@@ -1,11 +1,11 @@
 import gym
 from .base import Objective
-from ..core.other import _bind_method
+#from ..core.other import _bind_method
 
 class TDLearning(Objective):
     def __init__(self, q, q_targ=None, pi_targ = None, loss_function=None):
         self.q = q
-        self.q_targ = q_targ
+        self.q_targ = q if q_targ is None else q_targ
         self.pi_targ = pi_targ
         self.loss_function = loss_function
         self.proc = q.proc

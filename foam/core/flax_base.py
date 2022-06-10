@@ -1,9 +1,9 @@
 import numpy as np
 import jax
 import jax.numpy as jnp
+from jax import lax
 import flax.linen as nn
 import copy
-from torch.utils.data import DataLoader
 from .other import _set_dimensions
 
 
@@ -59,41 +59,41 @@ class JaxProcessor:
     def __init__(self, state_dim, action_dim, device=None):
         self.state_dim = state_dim
         self.action_dim = action_dim
-        #if device is None:
-        #    device = torch.device("cpu")
-        #self.device = device
+        if device is None:
+           device = jax.devices('cpu')[0]
+        self.device = device
 
     def __call__(self, arg, vectorize=False):
         assert type(arg) is np.ndarray, "Processor argument should be numpy array"
-        arg = torch.from_numpy(arg).float().to(self.device)
+        arg = jax.device_put(arg, self.device)
         arg = arg.view(-1, arg.shape[-1]) if self.state_dim in arg.shape or self.action_dim in arg.shape or vectorize else arg
         return arg
     
-    def invert(self, arg:torch.Tensor):
-        return arg.cpu().numpy()
+    def invert(self, arg:jnp.DeviceArray):
+        return np.asarray(arg)
 
     def max(self, target, dim, **kwargs):
-        values, _ = target.max(dim, **kwargs)
+        values = jnp.max(target, axis=dim, **kwargs)
         return values
 
     def multiply(self, target, *others):
         result = target
-        for other in others: result = result.mul(self(other))
+        for other in others: result = jnp.multiply(result, other)
         return result
 
-    def gather(self, target, dim, idx):
-        idx = torch.from_numpy(idx).view(target.size(0), -1).to(self.device)
-        return target.gather(dim, idx)
+    def gather(self, target, dim, idx):  ############### ToDo
+        idx = idx.reshape(target.shape[0], -1)
+        return lax.gather(target, idx, dim)
 
     def add(self, target, *args):
         result = target
         for arg in args: result += self(arg)
         return result
-    
+
     def reshape(self, target, shape):
-        return target.reshape(shape)
+        return jnp.reshape(target, shape)
 
     def mean(self, target, dim=None, **kwargs):
         if dim is None:
-            return torch.mean(target, **kwargs)
-        return torch.mean(target, dim=dim, **kwargs)
+            return jnp.mean(target)
+        return jnp.mean(target, axis=dim, **kwargs)

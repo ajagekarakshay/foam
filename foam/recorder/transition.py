@@ -7,18 +7,19 @@ __all__ = (
 
 
 class TransitionBatch:
-    def __init__(self, S, A, R, Done, S_next, Gamma, W=None, idx=None):
+    def __init__(self, S, A, R, Done, S_next, Gamma, A_next=None, W=None, idx=None):
         self.S = S
         self.A = A
         self.R = R
         self.Done = Done
         self.S_next = S_next
         self.Gamma = Gamma
+        self.A_next = A_next
         self.W = np.ones_like(R) if W is None else W
         self.idx = np.arange(R.shape[0], dtype='int32') if idx is None else idx
     
     @classmethod
-    def from_single(cls, s, a, r, done, s_next, gamma, w=1, idx=None):
+    def from_single(cls, s, a, r, done, s_next, gamma, a_next=None, w=1, idx=None):
         return cls(
             S=single_to_batch(s),
             A=single_to_batch(a),
@@ -26,6 +27,7 @@ class TransitionBatch:
             Done=single_to_batch(done),
             S_next=single_to_batch(s_next),
             Gamma = single_to_batch(gamma),
+            A_next = single_to_batch(a_next),
             W=single_to_batch(float(w)),
             idx=single_to_batch(idx) if idx is not None else None
         )
@@ -46,11 +48,11 @@ class TransitionBatch:
             yield self
             return
         
-        zipped = zip(self.S, self.A, self.R, self.Done, self.S_next, self.W)
+        zipped = zip(self.S, self.A, self.R, self.Done, self.S_next, self.A_next, self.W)
 
-        for s,a,r,done,s_next,w in zipped:
+        for s,a,r,done,s_next,a_next,w in zipped:
             yield TransitionBatch.from_single(
-                s=s, a=a, r=r, done=done, s_next=s_next, w=w
+                s=s, a=a, r=r, done=done, s_next=s_next, a_next=a_next, w=w
             ) 
     
 def single_to_batch(x):

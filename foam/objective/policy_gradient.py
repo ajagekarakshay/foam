@@ -1,7 +1,7 @@
 import torch
 import tensorflow as tf
 from .base import Objective
-from ..core.other import _bind_method
+#from ..core.other import _bind_method
 
 class DeterministicPG(Objective):
     def __init__(self, pi, q):
