@@ -7,6 +7,9 @@ __all__ = (
 )
 
 class EpsilonGreedy:
+    """"
+    Epsilon-greedy exploration strategy
+    """
     def __init__(self, epsilon, q, epsilon_min=0.01):
         self.epsilon = epsilon
         self.q = q

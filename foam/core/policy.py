@@ -9,6 +9,9 @@ __all__ = (
 )
 
 class Policy:
+    """
+    General Policy class
+    """
     def __new__(cls, *args, model=None, **kwargs):
         if torch.nn.Module in model.__class__.__mro__:
             #print("Torch policy instantiated")
@@ -20,6 +23,9 @@ class Policy:
             return None
 
 class StochasticPolicy:
+    """
+    General Stochastic Policy class
+    """
     def __new__(cls, *args, model=None, **kwargs):
         if torch.nn.Module in model.__class__.__mro__:
             print("Torch stochastic policy instantiated")
@@ -31,16 +37,25 @@ class StochasticPolicy:
             return None    
 
 class Policy_torch(TorchBaseFunction):
+    """
+    Policy class for PyTorch models.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def forward(self, s, training=True):
+        """
+        Computes policy output for given state as per current policy.
+        """
         s = self.proc(s)
         with torch.inference_mode(mode=not training):
             a = self.model(s)
         return a
 
     def act(self, s):
+        """
+        Computes actions for given states as per current policy.
+        """
         a = self(s, training=False)
         return self.proc.invert(a).ravel()
 
@@ -50,6 +65,9 @@ class Policy_tf(TFBaseFunction):
         super().__init__(*args, **kwargs) 
 
     def call(self, s, training=True):
+        """
+        Computes policy output for given state as per TF policy.
+        """
         pass
 
     def act(self, s):

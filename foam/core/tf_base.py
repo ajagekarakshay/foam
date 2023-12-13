@@ -8,6 +8,19 @@ from .other import _set_dimensions
 class TFBaseFunction(keras.Model):
     
     def __init__(self, env, model, optimizer, optim_args={}, trainer_args={}):
+        """
+        Initializes the Basefunction object for a TensorFlow model.
+
+        Args:
+            env: The environment object.
+            model: The model object.
+            optimizer: The optimizer class.
+            optim_args: A dictionary of optimizer arguments (default {}).
+            trainer_args: A dictionary of trainer arguments (default {}).
+
+        Returns:
+            None
+        """
         super().__init__()
         self.env = env
         self.model = model
@@ -21,11 +34,30 @@ class TFBaseFunction(keras.Model):
         raise NotImplementedError
 
     def soft_update(self, other, tau):
+        """
+        Soft updates the parameters of the current model with the parameters of another model using a given tau value.
+
+        Args:
+            other: The other model whose parameters will be used for the update.
+            tau: The weighting factor for the update. It determines the proportion of the new parameters that will be used for the update.
+
+        Returns:
+            None
+        """
         updated_params = [tau*new_param + (1.0-tau)*old_param \
                     for old_param, new_param in zip(self.model.get_weights(), other.model.get_weights())]
         self.model.set_weights(updated_params)
 
     def copy(self, deep=False):
+        """
+        Copies the model and optimizer.
+
+        Args:
+            deep: Whether to copy the model and optimizer. Default is False.
+
+        Returns:
+            TFBaseFunction: The copied model and optimizer.
+        """
         if deep:
             model_copy = copy.deepcopy(self.model)
             optimizer = self.optimizer
@@ -53,6 +85,13 @@ class TFBaseFunction(keras.Model):
 
 
 class TFProcessor:
+    """
+    A processor for TensorFlow models that converts numpy arrays to TensorFlow tensors.
+
+    Attributes:
+        state_dim (int): The dimensionality of the state space.
+        action_dim (int): The dimensionality of the action space.
+    """
     def __init__(self, state_dim, action_dim):
         self.state_dim = state_dim
         self.action_dim = action_dim

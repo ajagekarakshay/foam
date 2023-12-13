@@ -5,6 +5,9 @@ __all__ = (
 )
 
 class WandbRL:
+    """
+    Wandb logger class
+    """
     def __init__(self, mode="online", **kwargs):
         if wandb.run:
             wandb.finish() # End previous run

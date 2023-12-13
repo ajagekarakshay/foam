@@ -9,6 +9,16 @@ from .other import _set_dimensions
 class TorchBaseFunction(torch.nn.Module):
                             
     def __init__(self, env, model, optimizer, optim_args={}, trainer_args={}):
+        """
+        Initializes the basefunction object for a PyTorch model.
+
+        Parameters:
+            env (object): The environment object.
+            model (object): The model object.
+            optimizer (object): The optimizer object.
+            optim_args (dict): The optional arguments for the optimizer. Default is an empty dictionary.
+            trainer_args (dict): The optional arguments for the trainer. Default is an empty dictionary.
+        """
         super().__init__()
         self.env = env
         self.model = model
@@ -23,10 +33,29 @@ class TorchBaseFunction(torch.nn.Module):
         raise NotImplementedError
 
     def soft_update(self, other, tau):
+        """
+        Soft updates the parameters of the current model with the parameters of another model using a given tau value.
+
+        Parameters:
+            other (object): The other model whose parameters will be used for the update.
+            tau (float): The weighting factor for the update. It determines the proportion of the new parameters that will be used for the update.
+
+        Returns:
+            None
+        """
         for old_param, new_param in zip(self.model.parameters(), other.model.parameters()):
             old_param.data.copy_(tau*new_param.data + (1.0-tau)*old_param.data)
 
     def copy(self, deep=False):
+        """
+        Copies the model and optimizer.
+
+        Parameters:
+            deep (bool): Whether to copy the model and optimizer. Default is False.
+
+        Returns:
+            TorchBaseFunction: The copied model and optimizer.
+        """
         if deep:
             model_copy = copy.deepcopy(self.model)
             optimizer = self.optimizer
@@ -34,9 +63,16 @@ class TorchBaseFunction(torch.nn.Module):
         return copy.copy(self)
     
     def compile(self):
+        """
+        Compiles the model and optimizer by preparing them for the accelerator.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         self.model, self.optimizer = self.accelerator.prepare(self.model, self.optimizer)
-        #setattr(self.proc, "device", self.accelerator.device)
-        #self.proc.device = self.accelerator.device
 
     def _clear(self):
         optimizer = self.optimizer
@@ -56,6 +92,14 @@ class TorchBaseFunction(torch.nn.Module):
 
 
 class TorchProcessor:
+    """
+    A processor for PyTorch models that converts numpy arrays to PyTorch tensors.
+
+    Attributes:
+        state_dim (int): The dimensionality of the state space.
+        action_dim (int): The dimensionality of the action space.
+        device (torch.device): The device on which the processor will be used.
+    """
     def __init__(self, state_dim, action_dim, device=None):
         self.state_dim = state_dim
         self.action_dim = action_dim

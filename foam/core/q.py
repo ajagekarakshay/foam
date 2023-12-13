@@ -8,12 +8,18 @@ __all__ = (
 )
 
 def Q(*argv, **kwargs):
+    """
+    General Q-function class
+    """
     if torch.nn.Module in argv[1].__class__.__mro__:
         return Q_torch(*argv, **kwargs)
     if tf.keras.Model in argv[1].__class__.__mro__:
         return Q_tf(*argv, **kwargs)
 
-class Q_torch(TorchBaseFunction):             
+class Q_torch(TorchBaseFunction):    
+    """
+    Q function class for PyTorch models.
+    """         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         #self.proc = TorchProcessor(self.state_dim, self.action_dim)
@@ -26,6 +32,9 @@ class Q_torch(TorchBaseFunction):
         return value
 
 class Q_tf(TFBaseFunction):
+    """
+    Q function class for TensorFlow models.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         #self.proc = TFProcessor(self.state_dim, self.action_dim)
